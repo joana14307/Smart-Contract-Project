@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract WaterRefillingStation {
+    address public owner;
+    uint256 public pricePerGallon;
+    uint256 public GallonsSold;
+
+    event Purchase(address indexed buyer, uint256 gallons, uint256 amountPaid);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action.");
+        _;
+    }
+
+    constructor(uint256 _pricePerGallon) {
+        owner = msg.sender;
+        pricePerGallon = _pricePerGallon;
+        GallonsSold = 0;
+    }
+
+    function setPrice(uint256 _pricePerGallon) public onlyOwner {
+        require(_pricePerGallon > 0, "Price per gallon must be greater than 0.");
+        pricePerGallon = _pricePerGallon;
+    }
+
+    function buyWater(uint256 gallons) public payable {
+        require(gallons > 0, "You must buy at least one gallon.");
+        uint256 totalCost = gallons * pricePerGallon;
+        require(msg.value >= totalCost, "Insufficient funds sent.");
+
+        // Ensuring that the operation is successful before increasing the totalGallonsSold
+        uint256 previousTotalGallonsSold = GallonsSold;
+        GallonsSold += gallons;
+
+        // Using assert to check for arithmetic overflow (optional, as Solidity 0.8+ has built-in overflow checks)
+        assert(GallonsSold >= previousTotalGallonsSold);
+
+        // If the buyer sent more than the total cost, refund the excess amount
+        if (msg.value > totalCost) {
+            uint256 excessAmount = msg.value - totalCost;
+            (bool success, ) = msg.sender.call{value: excessAmount}("");
+            if (!success) {
+                revert("Refund failed.");
+            }
+        }
+
+        emit Purchase(msg.sender, gallons, totalCost);
+    }
+
+    function withdrawFunds() public onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds available for withdrawal.");
+
+        (bool success, ) = owner.call{value: balance}("");
+        if (!success) {
+            revert("Withdrawal failed.");
+        }
+    }
+
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+}
