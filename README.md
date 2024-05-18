@@ -1,8 +1,8 @@
 `SmartContract-Assessment`
-This Solidity smart contract, named WaterRefillingStation, is developed to establish an efficient system for managing a water refilling station, enabling seamless tracking and handling of water sales on the Ethereum blockchain.
+This Solidity smart contract, named `WaterRefillingStation`, is developed to establish an efficient system for managing a water refilling station, enabling seamless tracking and handling of water sales on the Ethereum blockchain.
 
 `Description`
-This contract demonstrates the usage of require(), assert(), and revert() statements for error handling.
+This contract demonstrates the usage of `require()`, `assert()`, and `revert()` statements for error handling.
 
 `Requirements`
 Contract successfully uses require()
